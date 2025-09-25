@@ -15,6 +15,11 @@ app.use(pino());
 
 // ========== ROUTES ==========
 
+// Root route
+app.get("/", (req, res) => {
+  res.json({ message: "Welcome to my API 🚀" });
+});
+
 // GET /notes — повертає всі нотатки
 app.get("/notes", (req, res) => {
   res.status(200).json({
@@ -52,8 +57,4 @@ app.use((err, req, res, next) => {
 // старт сервера
 app.listen(PORT, () => {
   console.log(`✅ Server is running on port ${PORT}`);
-});
-
-app.get("/", (req, res) => {
-  res.json({ message: "Welcome to my API 🚀" });
 });
