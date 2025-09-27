@@ -36,8 +36,8 @@ app.get("/notes/:noteId", (req, res) => {
 });
 
 // GET /test-error — симуляція помилки
-app.get("/test-error", () => {
-  throw new Error("Simulated server error");
+app.get("/test-error", (req, res, next) => {
+  next(new Error("Simulated server error"));
 });
 
 // ========== 404 HANDLER ==========
