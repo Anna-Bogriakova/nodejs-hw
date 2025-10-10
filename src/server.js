@@ -21,8 +21,11 @@ app.get("/", (req, res) => {
 });
 app.use("/notes", notesRouter);
 
+import { errors } from "celebrate";
+
 // Middleware
 app.use(notFoundHandler);
+app.use(errors()); // додаємо обробку помилок валідації
 app.use(errorHandler);
 
 // Start server after DB connection

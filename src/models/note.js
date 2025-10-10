@@ -25,4 +25,7 @@ const noteSchema = new Schema(
   { timestamps: true }
 );
 
+// 🆕 Текстовий індекс для пошуку
+noteSchema.index({ title: "text", content: "text" });
+
 export const Note = model("Note", noteSchema);
