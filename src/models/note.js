@@ -1,4 +1,5 @@
 import { Schema, model } from "mongoose";
+import { TAGS } from "../constants/tags.js"; // ✅ імпортуємо константу
 
 const noteSchema = new Schema(
   {
@@ -6,18 +7,7 @@ const noteSchema = new Schema(
     content: { type: String, trim: true, default: "" },
     tag: {
       type: String,
-      enum: [
-        "Work",
-        "Personal",
-        "Meeting",
-        "Shopping",
-        "Ideas",
-        "Travel",
-        "Finance",
-        "Health",
-        "Important",
-        "Todo",
-      ],
+      enum: TAGS, // ✅ використовуємо імпортований масив
       default: "Todo",
       trim: true,
     },

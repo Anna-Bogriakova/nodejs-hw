@@ -7,6 +7,7 @@ import { notFoundHandler } from "./middleware/notFoundHandler.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { connectMongoDB } from "./db/connectMongoDB.js";
 import notesRouter from "./routes/notesRoutes.js";
+import { errors } from "celebrate";
 
 const app = express();
 const PORT = process.env.PORT ?? 3030;
@@ -19,13 +20,11 @@ app.use(logger);
 app.get("/", (req, res) => {
   res.json({ message: "Hello world!" });
 });
-app.use("/notes", notesRouter);
-
-import { errors } from "celebrate";
+app.use(notesRouter); // ✅ без "/notes"
 
 // Middleware
 app.use(notFoundHandler);
-app.use(errors()); // додаємо обробку помилок валідації
+app.use(errors()); // ✅ для обробки помилок celebrate
 app.use(errorHandler);
 
 // Start server after DB connection

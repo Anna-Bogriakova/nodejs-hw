@@ -47,5 +47,10 @@ export const updateNoteSchema = celebrate({
     title: Joi.string().min(1),
     content: Joi.string().allow(""),
     tag: Joi.string().valid(...TAGS),
-  }),
+  })
+    .min(1) // ✅ вимагає наявність хоча б одного поля
+    .messages({
+      "object.min":
+        "At least one field (title, content, or tag) must be provided",
+    }),
 });
