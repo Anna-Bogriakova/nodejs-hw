@@ -1,24 +1,36 @@
-import { Router } from "express";
-import {
-  getAllNotes,
-  getNoteById,
-  createNote,
-  updateNote,
-  deleteNote,
-} from "../controllers/notesController.js";
-import {
-  getAllNotesSchema,
-  noteIdSchema,
-  createNoteSchema,
-  updateNoteSchema,
-} from "../validations/notesValidation.js";
+import express from "express";
+import cors from "cors";
+import "dotenv/config";
 
-const router = Router();
+import { logger } from "./middleware/logger.js";
+import { notFoundHandler } from "./middleware/notFoundHandler.js";
+import { errorHandler } from "./middleware/errorHandler.js";
+import { connectMongoDB } from "./db/connectMongoDB.js";
+import notesRouter from "./routes/notesRoutes.js";
+import { errors } from "celebrate";
 
-router.get("/", getAllNotesSchema, getAllNotes);
-router.get("/:noteId", noteIdSchema, getNoteById);
-router.post("/", createNoteSchema, createNote);
-router.patch("/:noteId", updateNoteSchema, updateNote);
-router.delete("/:noteId", noteIdSchema, deleteNote);
+const app = express();
+const PORT = process.env.PORT ?? 3030;
 
-export default router;
+// Middleware
+app.use(express.json());
+app.use(cors());
+app.use(logger);
+
+// Routes
+app.use(notesRouter); // ✅ без префікса /notes
+
+// Middleware for errors
+app.use(notFoundHandler);
+app.use(errors()); // обробка помилок Celebrate
+app.use(errorHandler);
+
+// Start server after DB connection
+const bootstrap = async () => {
+  await connectMongoDB();
+  app.listen(PORT, () => {
+    console.log(`✅ Server is running on port ${PORT}`);
+  });
+};
+
+bootstrap();
