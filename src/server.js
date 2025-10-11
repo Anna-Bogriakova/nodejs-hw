@@ -12,19 +12,17 @@ import { errors } from "celebrate";
 const app = express();
 const PORT = process.env.PORT ?? 3030;
 
+// Middleware
 app.use(express.json());
 app.use(cors());
 app.use(logger);
 
 // Routes
-app.get("/", (req, res) => {
-  res.json({ message: "Hello world!" });
-});
-app.use(notesRouter); // ✅ без "/notes"
+app.use(notesRouter); // ✅ без префікса /notes
 
-// Middleware
+// Middleware for errors
 app.use(notFoundHandler);
-app.use(errors()); // ✅ для обробки помилок celebrate
+app.use(errors()); // обробка помилок Celebrate
 app.use(errorHandler);
 
 // Start server after DB connection
