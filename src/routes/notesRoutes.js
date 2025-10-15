@@ -1,27 +1,48 @@
 import { Router } from "express";
-import { celebrate } from "celebrate";
-
+import { celebrate, Joi, Segments, errors } from "celebrate";
 import {
+  createNote,
+  deleteNote,
   getAllNotes,
   getNoteById,
-  createNote,
   updateNote,
-  deleteNote,
 } from "../controllers/notesController.js";
-
-import {
-  getAllNotesSchema,
-  noteIdSchema,
-  createNoteSchema,
-  updateNoteSchema,
-} from "../validations/notesValidation.js";
 
 const router = Router();
 
-router.get("/notes", getAllNotesSchema, getAllNotes);
-router.get("/notes/:noteId", noteIdSchema, getNoteById);
-router.post("/notes", createNoteSchema, createNote);
-router.patch("/notes/:noteId", updateNoteSchema, updateNote);
-router.delete("/notes/:noteId", noteIdSchema, deleteNote);
+// Schemas
+const getAllNotesSchema = {
+  [Segments.QUERY]: Joi.object({}), // пустой объект, если query нет
+};
+
+const noteIdSchema = {
+  [Segments.PARAMS]: Joi.object({
+    noteId: Joi.string().hex().length(24).required(),
+  }),
+};
+
+const createNoteSchema = {
+  [Segments.BODY]: Joi.object({
+    title: Joi.string().required(),
+    content: Joi.string().required(),
+  }),
+};
+
+const updateNoteSchema = {
+  [Segments.BODY]: Joi.object({
+    title: Joi.string().optional(),
+    content: Joi.string().optional(),
+  }),
+};
+
+// Routes
+router.get("/notes", celebrate(getAllNotesSchema), getAllNotes);
+router.get("/notes/:noteId", celebrate(noteIdSchema), getNoteById);
+router.post("/notes", celebrate(createNoteSchema), createNote);
+router.delete("/notes/:noteId", celebrate(noteIdSchema), deleteNote);
+router.patch("/notes/:noteId", celebrate(updateNoteSchema), updateNote);
+
+// Celebrate error handler (добавь после всех маршрутов)
+router.use(errors());
 
 export default router;
