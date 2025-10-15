@@ -13,6 +13,7 @@ const app = express();
 const PORT = process.env.PORT ?? 3030;
 
 // Middleware
+app.use("/", notesRouter);
 app.use(express.json());
 app.use(cors());
 app.use(logger);
