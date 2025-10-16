@@ -34,7 +34,8 @@ const updateNoteSchema = {
   }),
 };
 
-// ✅ Маршрути (лише необхідні, без дублювань!)
+// ✅ Маршрути
+router.get("/", getAllNotes); //
 router.get("/notes", getAllNotes);
 router.get("/notes/:noteId", celebrate(noteIdSchema), getNoteById);
 router.post("/notes", celebrate(createNoteSchema), createNote);
