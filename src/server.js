@@ -12,21 +12,20 @@ import { errors } from "celebrate";
 const app = express();
 const PORT = process.env.PORT ?? 3030;
 
-// Middleware
-app.use("/", notesRouter);
+// ✅ Middleware — у правильному порядку
 app.use(express.json());
 app.use(cors());
 app.use(logger);
 
-// Routes
-app.use(notesRouter); // ✅ без префікса /notes
+// ✅ Підключаємо роутер лише один раз, без дублювання
+app.use("/", notesRouter);
 
-// Middleware for errors
+// ✅ Middleware для обробки помилок (у правильному порядку)
 app.use(notFoundHandler);
-app.use(errors()); // обробка помилок Celebrate
+app.use(errors()); // Celebrate errors — лише тут!
 app.use(errorHandler);
 
-// Start server after DB connection
+// ✅ Запускаємо сервер після підключення до БД
 const bootstrap = async () => {
   await connectMongoDB();
   app.listen(PORT, () => {

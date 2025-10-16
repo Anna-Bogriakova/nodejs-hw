@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { celebrate, Joi, Segments, errors } from "celebrate";
+import { celebrate, Joi, Segments } from "celebrate";
 import {
   createNote,
   deleteNote,
@@ -10,11 +10,7 @@ import {
 
 const router = Router();
 
-// Schemas
-const getAllNotesSchema = {
-  [Segments.QUERY]: Joi.object({}), // пустой объект, если query нет
-};
-
+// ✅ Схеми валідації
 const noteIdSchema = {
   [Segments.PARAMS]: Joi.object({
     noteId: Joi.string().hex().length(24).required(),
@@ -29,21 +25,20 @@ const createNoteSchema = {
 };
 
 const updateNoteSchema = {
+  [Segments.PARAMS]: Joi.object({
+    noteId: Joi.string().hex().length(24).required(),
+  }),
   [Segments.BODY]: Joi.object({
     title: Joi.string().optional(),
     content: Joi.string().optional(),
   }),
 };
 
-// Routes
-router.get("/", getAllNotes);
-router.get("/notes", celebrate(getAllNotesSchema), getAllNotes);
+// ✅ Маршрути (лише необхідні, без дублювань!)
+router.get("/notes", getAllNotes);
 router.get("/notes/:noteId", celebrate(noteIdSchema), getNoteById);
 router.post("/notes", celebrate(createNoteSchema), createNote);
-router.delete("/notes/:noteId", celebrate(noteIdSchema), deleteNote);
 router.patch("/notes/:noteId", celebrate(updateNoteSchema), updateNote);
-
-// Celebrate error handler (добавь после всех маршрутов)
-router.use(errors());
+router.delete("/notes/:noteId", celebrate(noteIdSchema), deleteNote);
 
 export default router;
