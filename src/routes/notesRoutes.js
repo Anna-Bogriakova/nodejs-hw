@@ -11,6 +11,10 @@ import {
 const router = Router();
 
 // ✅ Схеми валідації
+const getAllNotesSchema = {
+  [Segments.QUERY]: Joi.object({}),
+};
+
 const noteIdSchema = {
   [Segments.PARAMS]: Joi.object({
     noteId: Joi.string().hex().length(24).required(),
@@ -35,8 +39,7 @@ const updateNoteSchema = {
 };
 
 // ✅ Маршрути
-router.get("/", getAllNotes); //
-router.get("/notes", getAllNotes);
+router.get("/notes", celebrate(getAllNotesSchema), getAllNotes);
 router.get("/notes/:noteId", celebrate(noteIdSchema), getNoteById);
 router.post("/notes", celebrate(createNoteSchema), createNote);
 router.patch("/notes/:noteId", celebrate(updateNoteSchema), updateNote);
