@@ -20,7 +20,7 @@ app.use(cookieParser());
 app.use(cors({ origin: true, credentials: true }));
 app.use(logger);
 
-app.use("/auth", authRouter); // ✅ важливо
+app.use("/", authRouter); // ✅ важливо
 app.use("/notes", notesRouter);
 
 app.use(notFoundHandler);
