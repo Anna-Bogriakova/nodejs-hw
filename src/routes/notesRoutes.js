@@ -1,4 +1,6 @@
 import { Router } from "express";
+import { celebrate } from "celebrate";
+
 import {
   createNote,
   deleteNote,
@@ -6,6 +8,7 @@ import {
   getNoteById,
   updateNote,
 } from "../controllers/notesController.js";
+
 import {
   createNoteSchema,
   getAllNotesSchema,
@@ -15,11 +18,15 @@ import {
 
 const router = Router();
 
-// ✅ правильні маршрути з урахуванням зауважень ментора
-router.get("/notes", getAllNotesSchema, getAllNotes);
-router.get("/notes/:noteId", noteIdSchema, getNoteById);
-router.post("/notes", createNoteSchema, createNote);
-router.patch("/notes/:noteId", updateNoteSchema, updateNote);
-router.delete("/notes/:noteId", noteIdSchema, deleteNote);
+// ✅ правильне використання celebrate()
+router.get("/", celebrate({ query: getAllNotesSchema }), getAllNotes);
+router.get("/:noteId", celebrate({ params: noteIdSchema }), getNoteById);
+router.post("/", celebrate({ body: createNoteSchema }), createNote);
+router.patch(
+  "/:noteId",
+  celebrate({ params: noteIdSchema, body: updateNoteSchema }),
+  updateNote
+);
+router.delete("/:noteId", celebrate({ params: noteIdSchema }), deleteNote);
 
 export default router;
