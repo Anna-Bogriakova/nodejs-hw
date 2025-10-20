@@ -16,9 +16,13 @@ import {
   updateNoteSchema,
 } from "../validations/notesValidation.js";
 
+import { authenticate } from "../middleware/authenticate.js"; // 🆕 імпорт
+
 const router = Router();
 
-// ✅ правильне використання celebrate()
+// 🧩 Усі маршрути нотаток тепер захищені
+router.use(authenticate);
+
 router.get("/", celebrate({ query: getAllNotesSchema }), getAllNotes);
 router.get("/:noteId", celebrate({ params: noteIdSchema }), getNoteById);
 router.post("/", celebrate({ body: createNoteSchema }), createNote);

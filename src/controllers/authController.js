@@ -110,3 +110,19 @@ export const logoutUser = async (req, res, next) => {
     next(err);
   }
 };
+
+export const register = (req, res) => {
+  res.json({ message: "Register route works!" });
+};
+
+export const login = (req, res) => {
+  res.json({ message: "Login route works!" });
+};
+
+export const logout = (req, res) => {
+  res.json({ message: "Logout route works!" });
+};
+
+export const getCurrent = (req, res) => {
+  res.json({ message: "Current user route works!" });
+};
