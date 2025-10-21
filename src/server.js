@@ -23,8 +23,8 @@ app.get("/", (req, res) => {
   res.json({ message: "Server is running 🚀" });
 });
 
-app.use(authRoutes);
-app.use(notesRoutes);
+app.use("/auth", authRoutes);
+app.use("/notes", notesRoutes);
 
 app.use(notFoundHandler);
 app.use(errors());
