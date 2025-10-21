@@ -16,12 +16,9 @@ import { authenticate } from "../middleware/authenticate.js"; // ✅ добав�
 
 const router = Router();
 
-// 🔓 Открытые маршруты (без токена)
-router.post("/auth/register", celebrate(registerUserSchema), registerUser);
-router.post("/auth/login", celebrate(loginUserSchema), loginUser);
-
-// 🔐 Закрытые маршруты (требуют токен)
-router.post("/auth/refresh", authenticate, refreshUserSession);
-router.post("/auth/logout", authenticate, logoutUser);
+router.post("/register", celebrate(registerUserSchema), registerUser);
+router.post("/login", celebrate(loginUserSchema), loginUser);
+router.post("/refresh", authenticate, refreshUserSession);
+router.post("/logout", authenticate, logoutUser);
 
 export default router;
