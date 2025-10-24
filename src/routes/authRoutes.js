@@ -12,13 +12,18 @@ import {
   refreshUserSession,
 } from "../controllers/authController.js";
 
-import { authenticate } from "../middleware/authenticate.js"; // ✅ добавляем middleware
-
 const router = Router();
 
+// ✅ Реєстрація
 router.post("/register", celebrate(registerUserSchema), registerUser);
+
+// ✅ Логін
 router.post("/login", celebrate(loginUserSchema), loginUser);
-router.post("/refresh", authenticate, refreshUserSession);
-router.post("/logout", authenticate, logoutUser);
+
+// ✅ Оновлення сесії (без authenticate)
+router.post("/refresh", refreshUserSession);
+
+// ✅ Логаут (без authenticate)
+router.post("/logout", logoutUser);
 
 export default router;
