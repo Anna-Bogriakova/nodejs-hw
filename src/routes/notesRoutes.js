@@ -16,21 +16,18 @@ import {
   updateNoteSchema,
 } from "../validations/notesValidation.js";
 
-import { authenticate } from "../middleware/authenticate.js"; // 🆕 імпорт
+import { authenticate } from "../middleware/authenticate.js";
 
 const router = Router();
 
 // 🧩 Усі маршрути нотаток тепер захищені
 router.use(authenticate);
 
-router.get("/", celebrate({ query: getAllNotesSchema }), getAllNotes);
-router.get("/:noteId", celebrate({ params: noteIdSchema }), getNoteById);
-router.post("/", celebrate({ body: createNoteSchema }), createNote);
-router.patch(
-  "/:noteId",
-  celebrate({ params: noteIdSchema, body: updateNoteSchema }),
-  updateNote
-);
-router.delete("/:noteId", celebrate({ params: noteIdSchema }), deleteNote);
+// ✅ Ось так правильно — схеми вже всередині містять Segments
+router.get("/", celebrate(getAllNotesSchema), getAllNotes);
+router.get("/:noteId", celebrate(noteIdSchema), getNoteById);
+router.post("/", celebrate(createNoteSchema), createNote);
+router.patch("/:noteId", celebrate(updateNoteSchema), updateNote);
+router.delete("/:noteId", celebrate(noteIdSchema), deleteNote);
 
 export default router;
