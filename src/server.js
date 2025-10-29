@@ -1,4 +1,3 @@
-// src/server.js
 import express from "express";
 import cors from "cors";
 import "dotenv/config";
@@ -17,7 +16,7 @@ import userRoutes from "./routes/userRoutes.js";
 const app = express();
 const PORT = process.env.PORT ?? 3000;
 
-// middleware - order matters
+// middleware
 app.use(logger);
 app.use(express.json());
 app.use(cookieParser());
@@ -28,19 +27,19 @@ app.use(
   })
 );
 
-// healthcheck / root
+// healthcheck
 app.get("/", (req, res) => {
   res.json({ message: "Server is running 🚀" });
 });
 
-// api routes
-app.use("/api/auth", authRoutes);
-app.use("/api/notes", notesRoutes);
-app.use("/api/users", userRoutes);
+// 🟢 без префіксів "/api"
+app.use("/auth", authRoutes);
+app.use("/notes", notesRoutes);
+app.use("/users", userRoutes);
 
 // error handling
 app.use(notFoundHandler);
-app.use(errors()); // celebrate error handler
+app.use(errors());
 app.use(errorHandler);
 
 const bootstrap = async () => {

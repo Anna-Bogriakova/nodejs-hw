@@ -1,4 +1,3 @@
-// src/controllers/authController.js
 import createHttpError from "http-errors";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -9,6 +8,7 @@ import { sendEmail } from "../utils/sendMail.js";
 
 const SALT_ROUNDS = 10;
 
+// REGISTER
 export const registerUser = async (req, res, next) => {
   try {
     const { email, password, name } = req.body;
@@ -29,12 +29,13 @@ export const registerUser = async (req, res, next) => {
     const secure = process.env.COOKIE_SECURE !== "false";
     setSessionCookies(res, session, { secure });
 
-    res.status(201).json(user); // toJSON in model removes password
+    res.status(201).json(user); // password automatically removed by toJSON()
   } catch (err) {
     next(err);
   }
 };
 
+//  LOGIN
 export const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -45,7 +46,7 @@ export const loginUser = async (req, res, next) => {
     const match = await bcrypt.compare(password, user.password);
     if (!match) throw createHttpError(401, "Invalid credentials");
 
-    // Remove old sessions for this user (optional)
+    // remove old sessions (optional)
     await Session.deleteMany({ userId: user._id });
 
     const session = await createSession(user._id);
@@ -58,6 +59,7 @@ export const loginUser = async (req, res, next) => {
   }
 };
 
+// REFRESH SESSION
 export const refreshUserSession = async (req, res, next) => {
   try {
     const { sessionId, refreshToken } = req.cookies || {};
@@ -74,10 +76,8 @@ export const refreshUserSession = async (req, res, next) => {
       throw createHttpError(401, "Session token expired");
     }
 
-    // delete old session
     await Session.findByIdAndDelete(sessionId);
 
-    // create new session
     const newSession = await createSession(session.userId);
     const secure = process.env.COOKIE_SECURE !== "false";
     setSessionCookies(res, newSession, { secure });
@@ -88,6 +88,7 @@ export const refreshUserSession = async (req, res, next) => {
   }
 };
 
+// LOGOUT
 export const logoutUser = async (req, res, next) => {
   try {
     const { sessionId } = req.cookies || {};
@@ -111,14 +112,14 @@ export const logoutUser = async (req, res, next) => {
   }
 };
 
-// request reset email
+// REQUEST PASSWORD RESET
 export const requestResetEmail = async (req, res, next) => {
   try {
     const { email } = req.body;
     const user = await User.findOne({ email });
     const message = { message: "Password reset email sent successfully" };
 
-    // always return same message to avoid email discovery
+    // Always return the same message to prevent email discovery
     if (!user) return res.status(200).json(message);
 
     const token = jwt.sign(
@@ -132,12 +133,15 @@ export const requestResetEmail = async (req, res, next) => {
     try {
       await sendEmail({
         to: user.email,
-        subject: "Password reset",
-        templateName: "reset-password-email",
-        context: { name: user.username || user.email, resetUrl },
+        subject: "Password Reset",
+        html: `
+          <p>Hello ${user.username || user.email},</p>
+          <p>You requested to reset your password. Click the link below to continue:</p>
+          <p><a href="${resetUrl}">${resetUrl}</a></p>
+          <p>If you didn’t request this, please ignore this email.</p>
+        `,
       });
     } catch (err) {
-      // log if needed
       return next(
         createHttpError(
           500,
@@ -152,14 +156,15 @@ export const requestResetEmail = async (req, res, next) => {
   }
 };
 
-// reset password using token
+// RESET PASSWORD
 export const resetPassword = async (req, res, next) => {
   try {
     const { token, password } = req.body;
     let payload;
+
     try {
       payload = jwt.verify(token, process.env.JWT_SECRET);
-    } catch (err) {
+    } catch {
       throw createHttpError(401, "Invalid or expired token");
     }
 
