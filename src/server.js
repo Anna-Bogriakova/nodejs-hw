@@ -1,60 +1,47 @@
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
-import pino from "pino-http";
+import "dotenv/config";
+import cookieParser from "cookie-parser";
+import { errors } from "celebrate";
 
-dotenv.config();
+import { logger } from "./middleware/logger.js";
+import { notFoundHandler } from "./middleware/notFoundHandler.js";
+import { errorHandler } from "./middleware/errorHandler.js";
+import { connectMongoDB } from "./db/connectMongoDB.js";
+
+// 🆕 Імпорти нових роутів
+import notesRouter from "./routes/notesRoutes.js";
+import authRouter from "./routes/authRoutes.js";
 
 const app = express();
-const PORT = process.env.PORT || 3030;
+const PORT = process.env.PORT ?? 3030;
 
-// middleware
-app.use(cors());
+// ✅ Middleware — у правильному порядку
 app.use(express.json());
-app.use(pino());
+app.use(cookieParser());
+app.use(
+  cors({
+    origin: true, // або можна поставити точний домен, наприклад, "https://yourapp.onrender.com"
+    credentials: true, // 🆕 дозволяє передавати cookies
+  })
+);
+app.use(logger);
 
-// ========== ROUTES ==========
+// ✅ Роутинг
+app.use("/auth", authRouter); // 🆕 маршрути для реєстрації/логіну/сесій
+app.use("/notes", notesRouter); // 🆕 усі нотатки тепер захищені (через middleware authenticate у routes)
 
-// Root route
-app.get("/", (req, res) => {
-  res.json({ message: "Welcome to my API 🚀" });
-});
+// ✅ Middleware для обробки помилок (у правильному порядку)
+app.use(notFoundHandler);
+app.use(errors()); // Celebrate errors — лише тут!
+app.use(errorHandler);
 
-// GET /notes — повертає всі нотатки
-app.get("/notes", (req, res) => {
-  res.status(200).json({
-    message: "Retrieved all notes",
+// ✅ Запускаємо сервер після підключення до БД
+const bootstrap = async () => {
+  await connectMongoDB();
+  app.listen(PORT, () => {
+    console.log(`✅ Server is running on port ${PORT}`);
   });
-});
+};
 
-// GET /notes/:noteId — повертає одну нотатку
-app.get("/notes/:noteId", (req, res) => {
-  const { noteId } = req.params;
-  res.status(200).json({
-    message: `Retrieved note with ID: ${noteId}`,
-  });
-});
-
-// GET /test-error — симуляція помилки
-app.get("/test-error", (req, res, next) => {
-  next(new Error("Simulated server error"));
-});
-
-// ========== 404 HANDLER ==========
-app.use((req, res) => {
-  res.status(404).json({
-    message: "Route not found",
-  });
-});
-
-// ========== ERROR HANDLER ==========
-app.use((err, req, res, next) => {
-  res.status(500).json({
-    message: err.message || "Internal Server Error",
-  });
-});
-
-// старт сервера
-app.listen(PORT, () => {
-  console.log(`✅ Server is running on port ${PORT}`);
-});
+bootstrap();

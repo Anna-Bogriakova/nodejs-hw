@@ -21,9 +21,15 @@
   "homepage": "https://github.com/Anna-Bogriakova/nodejs-hw#readme",
   "description": "Homework project for Node.js course",
   "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "celebrate": "^15.0.3",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
-    "dotenv": "^17.2.2",
+    "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "http-errors": "^2.0.0",
+    "joi": "^18.0.1",
+    "mongoose": "^8.18.3",
     "pino-http": "^10.5.0",
     "pino-pretty": "^11.3.0"
   },
