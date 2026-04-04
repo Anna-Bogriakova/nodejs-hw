@@ -1,60 +1,53 @@
+// src/server.js
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
-import pino from "pino-http";
+import "dotenv/config";
+import cookieParser from "cookie-parser";
+import { errors } from "celebrate";
 
-dotenv.config();
+import { connectMongoDB } from "./db/connectMongoDB.js";
+import { logger } from "./middleware/logger.js";
+import { notFoundHandler } from "./middleware/notFoundHandler.js";
+import { errorHandler } from "./middleware/errorHandler.js";
+
+import authRoutes from "./routes/authRoutes.js";
+import notesRoutes from "./routes/notesRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 const app = express();
-const PORT = process.env.PORT || 3030;
+const PORT = process.env.PORT ?? 3000;
 
-// middleware
-app.use(cors());
+// middleware - order matters
+app.use(logger);
 app.use(express.json());
-app.use(pino());
+app.use(cookieParser());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_DOMAIN || true,
+    credentials: true,
+  })
+);
 
-// ========== ROUTES ==========
-
-// Root route
+// healthcheck / root
 app.get("/", (req, res) => {
-  res.json({ message: "Welcome to my API 🚀" });
+  res.json({ message: "Server is running 🚀" });
 });
 
-// GET /notes — повертає всі нотатки
-app.get("/notes", (req, res) => {
-  res.status(200).json({
-    message: "Retrieved all notes",
+// api routes
+app.use("/api/auth", authRoutes);
+app.use("/api/notes", notesRoutes);
+app.use("/api/users", userRoutes);
+
+// error handling
+app.use(notFoundHandler);
+app.use(errors()); // celebrate error handler
+app.use(errorHandler);
+
+const bootstrap = async () => {
+  await connectMongoDB();
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
   });
-});
+};
 
-// GET /notes/:noteId — повертає одну нотатку
-app.get("/notes/:noteId", (req, res) => {
-  const { noteId } = req.params;
-  res.status(200).json({
-    message: `Retrieved note with ID: ${noteId}`,
-  });
-});
-
-// GET /test-error — симуляція помилки
-app.get("/test-error", (req, res, next) => {
-  next(new Error("Simulated server error"));
-});
-
-// ========== 404 HANDLER ==========
-app.use((req, res) => {
-  res.status(404).json({
-    message: "Route not found",
-  });
-});
-
-// ========== ERROR HANDLER ==========
-app.use((err, req, res, next) => {
-  res.status(500).json({
-    message: err.message || "Internal Server Error",
-  });
-});
-
-// старт сервера
-app.listen(PORT, () => {
-  console.log(`✅ Server is running on port ${PORT}`);
-});
+bootstrap();
